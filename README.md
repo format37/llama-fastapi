@@ -23,3 +23,6 @@ python3 train.py
 ```
 python3 generate.py
 ```
+### Credits
+* [llama-from-scratch article](https://blog.briankitano.com/llama-from-scratch/)  
+* [llama-from-scratch github](https://github.com/bkitano/llama-from-scratch)
