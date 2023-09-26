@@ -375,7 +375,7 @@ def train():
         "vocab_size": len(vocab),
         'd_model': 128,
         'epochs': 300,
-        'log_interval': 100,
+        'log_interval': 30000,
         'batch_size': 32,
         'n_layers': 4,
         'n_heads': 8,
