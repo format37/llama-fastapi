@@ -5,7 +5,24 @@ def call_generate_api(start_text):
     url = "http://localhost:8091/generate/"
     
     # Query parameters
-    params = {"start_text": start_text}
+    # params = {"start_text": start_text}
+    MASTER_CONFIG = {
+        'context_window': 16,
+        'd_model': 128,
+        'epochs': 40000,
+        'log_interval': 100,
+        'batch_size': 32,
+        'n_layers': 4,
+        'n_heads': 8,
+    }
+
+    params = {
+        "start_text": start_text, 
+        "model_filename": "llama_1.0713104546070098.pt",
+        "dataset_filepath": "data/telegram_export/input.txt",
+        "MASTER_CONFIG": MASTER_CONFIG
+        }
+
     
     # Make the API call
     response = requests.get(url, params=params)
