@@ -4,8 +4,6 @@ def call_generate_api(start_text):
     # URL of the FastAPI server
     url = "http://localhost:8091/generate/"
     
-    # Query parameters
-    # params = {"start_text": start_text}
     MASTER_CONFIG = {
         'context_window': 16,
         'd_model': 128,
@@ -34,6 +32,6 @@ def call_generate_api(start_text):
         return f"Error: {response.status_code}"
 
 if __name__ == "__main__":
-    start_text = "WHat speech"
+    start_text = "What speech"
     generated_text = call_generate_api(start_text)
     print(f"Generated text: {generated_text}")

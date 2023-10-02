@@ -630,13 +630,16 @@ def generate(params: dict = None):
 
 
 @app.post("/train/")
-def train(
-    MASTER_CONFIG: dict = None
-    ):
-    dataset_filepath = 'data/telegram_export/input.txt' # TODO: Remove this line
-    # Record the start time
+def train(params: dict = None):
     start_time = datetime.now()
     print(f"Start Time: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    model_filename = params['model_filename']
+    dataset_filepath = params['dataset_filepath']
+    MASTER_CONFIG = params['MASTER_CONFIG']
+
+    # dataset_filepath = 'data/telegram_export/input.txt' # TODO: Remove this line
+    # Record the start time
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # device = torch.device("cpu")
@@ -670,6 +673,10 @@ def train(
 
     llama = Llama(MASTER_CONFIG).to(device)
     optimizer = torch.optim.Adam(llama.parameters())
+    
+    if model_filename is not None:
+        print('Loading the model')
+        llama.load_state_dict(torch.load(f"./data/{model_filename}"))
 
     llama_optimizer = torch.optim.Adam(
         llama.parameters(), 
