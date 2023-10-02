@@ -559,12 +559,12 @@ def chat(user_input: str):
 
 
 @app.get("/generate/")
-def generate(
-    start_text: str = Query(..., min_length=1), 
-    model_filename: str = Query(..., min_length=1),
-    dataset_filepath: str = Query(..., min_length=1),
-    MASTER_CONFIG: dict = Body(...),
-    ):
+def generate(params: dict = None):
+    start_text = params['start_text']
+    model_filename = params['model_filename']
+    dataset_filepath = params['dataset_filepath']
+    MASTER_CONFIG = params['MASTER_CONFIG']
+    max_new_tokens = params['max_new_tokens']
     # Record the start time
     start_time = datetime.now()
     print(f"Start Time: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -581,26 +581,15 @@ def generate(
     stoi = {ch:i for i, ch in enumerate(vocab)}
     vocab = sorted(list(set(lines)))
 
-    """MASTER_CONFIG = {
-        'context_window': 16,
-        "vocab_size": len(vocab),
-        'd_model': 128,
-        'epochs': 40000,
-        'log_interval': 100,
-        'batch_size': 32,
-        'n_layers': 4,
-        'n_heads': 8,
-    }"""
     MASTER_CONFIG['vocab_size'] = len(vocab)
 
     # Get batches config
-    """config = {
+    config = {
         'batch_size': 32,
         'context_window': 11,
         'd_model': 13,
-    }"""
-    # copy
-    config = MASTER_CONFIG.copy()
+    }
+    # config = MASTER_CONFIG.copy()
 
     job_type_train = True
 
@@ -625,7 +614,7 @@ def generate(
 
     # Generate part:
     # print(generate(device, llama, MASTER_CONFIG, itos, 500)[0])
-    generated_text = generate_from_text(device, llama, MASTER_CONFIG, itos, stoi, start_text=start_text, max_new_tokens=50)
+    generated_text = generate_from_text(device, llama, MASTER_CONFIG, itos, stoi, start_text=start_text, max_new_tokens=max_new_tokens)
     print(generated_text)
 
     # Record the end time
@@ -638,26 +627,6 @@ def generate(
 
     # generated_text = generate_text(start_text)
     return {"generated_text": generated_text}
-
-
-class MasterConfigModel(BaseModel):
-    context_window: int
-    d_model: int
-    epochs: int
-    log_interval: int
-    batch_size: int
-    n_layers: int
-    n_heads: int
-
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate_to_json
-
-    @classmethod
-    def validate_to_json(cls, value):
-        if isinstance(value, str):
-            return cls(**json.loads(value))
-        return value
 
 
 @app.post("/train/")
@@ -725,8 +694,8 @@ def train(
             print_logs=True
             )
 
-    # print('Saving the model')
-    # torch.save(llama.state_dict(), "data/llama.pt")
+    print('Saving the model')
+    torch.save(llama.state_dict(), "data/llama.pt")
 
     xs, ys = get_batches(dataset, 'test', MASTER_CONFIG['batch_size'], MASTER_CONFIG['context_window'], config)
     xs, ys = xs.to(device), ys.to(device)  # Move data to device
@@ -734,11 +703,6 @@ def train(
     logits, loss = llama(xs, ys)
 
     print(loss)
-
-    # Generate part:
-    # print(generate(device, llama, MASTER_CONFIG, itos, 500)[0])
-    # generated_text = generate_from_text(device, llama, MASTER_CONFIG, itos, stoi, start_text=start_text, max_new_tokens=50)
-    # print(generated_text)
 
     # Record the end time
     end_time = datetime.now()
@@ -748,6 +712,4 @@ def train(
     time_difference = end_time - start_time
     print(f"Time Difference: {str(time_difference)}")
 
-    # generated_text = generate_text(start_text)
-    # return {"generated_text": generated_text}
     return {"loss": loss}
