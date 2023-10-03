@@ -5,9 +5,9 @@ def call_train_api():
     # URL of the FastAPI server
     url = "http://localhost:8091/train/"
 
-    dataset_filepath = 'data/telegram_export/input.txt'
+    dataset_filepath = 'data/tiny_stories/TinyStoriesV2-GPT4-train.txt'
     
-    MASTER_CONFIG = {
+    """MASTER_CONFIG = {
         'context_window': 16,
         'd_model': 128,
         'epochs': 64000,
@@ -15,10 +15,19 @@ def call_train_api():
         'batch_size': 12288,
         'n_layers': 4,
         'n_heads': 8,
+    }"""
+    MASTER_CONFIG = {
+        'context_window': 16,
+        'd_model': 768,
+        'epochs': 8000,
+        'log_interval': 1,
+        'batch_size': 1,
+        'n_layers': 12,
+        'n_heads': 12,
     }
     
     params = {
-        "model_filename": "llama_0.8231694221496582.pt",
+        "model_filename": None,
         "dataset_filepath": dataset_filepath,
         "MASTER_CONFIG": MASTER_CONFIG
         }

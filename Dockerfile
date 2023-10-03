@@ -15,7 +15,8 @@ RUN pip install --trusted-host pypi.python.org -r requirements.txt
 # RUN pip install --no-cache-dir inference-gpu
 
 # Copy the current directory contents into the container at /app
-COPY . /app/
+# COPY . /app/
+COPY ./server.py /app/
 
 # Make port 80 available to the world outside this container
 EXPOSE 8091

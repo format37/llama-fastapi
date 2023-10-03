@@ -591,7 +591,7 @@ def generate(params: dict = None):
     }
     # config = MASTER_CONFIG.copy()
 
-    job_type_train = True
+    # job_type_train = True
 
     # dataset = torch.tensor(encode(lines, stoi), dtype=torch.int8)
     dataset = torch.tensor(encode(lines, stoi), dtype=torch.int16)
@@ -638,13 +638,11 @@ def train(params: dict = None):
     dataset_filepath = params['dataset_filepath']
     MASTER_CONFIG = params['MASTER_CONFIG']
 
-    # dataset_filepath = 'data/telegram_export/input.txt' # TODO: Remove this line
-    # Record the start time
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # device = torch.device("cpu")
-    print('Device:', device)
-
+    # print('Device:', device)
+    logger.debug('Device: %s', device)
+    logger.debug('Reading dataset from: %s', dataset_filepath)
     lines = open(f'./{dataset_filepath}', 'r').read()
     vocab = sorted(list(set(lines)))
     itos = {i:ch for i, ch in enumerate(vocab)}
@@ -661,7 +659,7 @@ def train(params: dict = None):
 
     job_type_train = True
     train_type = 'text'  # 'dialogue' or 'text'
-
+    logger.debug('encoding dataset')
     if train_type == 'dialogue':
         raw_dialogues = split_lines_into_dialogues(lines)
         dataset = [{'user': encode(dialogue['user'], stoi), 'bot': encode(dialogue['bot'], stoi)} for dialogue in raw_dialogues]
@@ -670,7 +668,7 @@ def train(params: dict = None):
         dataset = torch.tensor(encode(lines, stoi), dtype=torch.int16)  # Use int16 or another suitable dtype
         # This is just a sample. The actual code will depend on how you plan to structure the dictionaries.
         # dataset = [{'user': encode(user_line, stoi), 'bot': encode(bot_line, stoi)} for user_line, bot_line in some_function(lines)]
-
+    logger.debug('sending dataset to device')
     llama = Llama(MASTER_CONFIG).to(device)
     optimizer = torch.optim.Adam(llama.parameters())
     
@@ -687,7 +685,8 @@ def train(params: dict = None):
     )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(llama_optimizer, 300, eta_min=1e-5)
 
-    print('training llama')
+    # print('training llama')
+    logger.debug('training llama')
     if train_type == 'dialogue':
         train_llama_dialogue(device, llama, optimizer, dataset, stoi, config=MASTER_CONFIG, print_logs=True)
     else:
@@ -701,7 +700,8 @@ def train(params: dict = None):
             print_logs=True
             )
 
-    print('Saving the model')
+    # print('Saving the model')
+    logger.debug('Saving the model')
     torch.save(llama.state_dict(), "data/llama.pt")
 
     xs, ys = get_batches(dataset, 'test', MASTER_CONFIG['batch_size'], MASTER_CONFIG['context_window'], config)
@@ -713,10 +713,12 @@ def train(params: dict = None):
 
     # Record the end time
     end_time = datetime.now()
-    print(f"End Time: {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    # print(f"End Time: {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    logger.debug(f"End Time: {end_time.strftime('%Y-%m-%d %H:%M:%S')}")
 
     # Calculate the time difference
     time_difference = end_time - start_time
-    print(f"Time Difference: {str(time_difference)}")
+    # print(f"Time Difference: {str(time_difference)}")
+    logger.debug(f"Time Difference: {str(time_difference)}")
 
     return {"loss": loss}
