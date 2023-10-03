@@ -599,7 +599,7 @@ def generate(params: dict = None):
     llama = Llama(MASTER_CONFIG).to(device)
     optimizer = torch.optim.Adam(llama.parameters())
 
-    print('Loading the model')
+    print(f'Loading the model from ./data/{model_filename}')
     # model_filename = "llama.pt"
     # llama.load_state_dict(torch.load("./data/llama.pt"))
     llama.load_state_dict(torch.load(f"./data/{model_filename}"))
